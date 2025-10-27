@@ -1,0 +1,10 @@
+{
+  "name": "hadith-json-api",
+  "env": "node",
+  "buildCommand": "npm install && npm run build",
+  "startCommand": "node dist/server.js",
+  "healthCheckPath": "/",
+  "envVars": [],
+  "region": "frankfurt",
+  "plan": "free"
+}

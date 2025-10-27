@@ -1,50 +1,129 @@
-# Hadith-json Database [1.2.0]
+# 📚 Hadith API (واجهة برمجة الأحاديث)
 
-Hadith is the second source of Islamic law after the Quran. It is the sayings and actions of Prophet Muhammed (PBUH).
+<div dir="rtl">
 
-An extensive JSON-formatted database is available, containing the Hadiths - Prophet Muhammed's (PBUH) sayings and actions - in both Arabic and English. The database encompasses 17 books of Hadiths.
+قاعدة بيانات شاملة للأحاديث النبوية الشريفة مع واجهة برمجة تطبيقات (API) حديثة. تتيح الوصول إلى أكثر من 50,000 حديث من 17 كتاباً من كتب السنة، مع دعم كامل للغتين العربية والإنجليزية، وإمكانيات بحث متقدمة في المتن والإسناد.
 
-قاعدة بيانات شاملة بصيغة JSON، تحتوي على الأحاديث النبوية الشريفة باللغتين العربية والإنجليزية. تشمل القاعدة 17 كتاباً من كتب السنة النبوية.
+</div>
+
+## 🌟 Features
+
+- **Comprehensive Collection**: 50,884 hadiths from 17 authentic books
+- **Bilingual Support**: Full Arabic and English translations
+- **Advanced Search**: Search by text, narrator, or grade
+- **Rich Metadata**: Includes grades, narrators chain, and references
+- **Modern API**: RESTful endpoints with JSON responses
+- **Well Documented**: Detailed API documentation with examples
 
 ## Hadiths Count:
 
 -  Total Hadiths: 50,884 Hadiths.
 
-## Books included:
+## 📚 Available Books
 
-1. Sahih al-Bukhari صحيح البخاري
-1. Sahih Muslim صحيح مسلم
-1. Sunan Abi Dawud سنن أبي داود
-1. Jami` at-Tirmidhi جامع الترمذي
-1. Sunan an-Nasa'i سنن النسائي
-1. Sunan Ibn Majah سنن ابن ماجه
-1. Muwatta Malik موطأ مالك
-1. Musnad Ahmad مسند أحمد
-1. Sunan ad-Darimi سنن الدارمي
-1. Riyad as-Salihin رياض الصالحين
-1. Shamail al-Muhammadiyah الشمائل المحمدية
-1. Bulugh al-Maram بلوغ المرام
-1. Al-Adab Al-Mufrad الأدب المفرد
-1. Mishkat al-Masabih مشكاة المصابيح
-1. The Forty Hadith of al-Imam an-Nawawi الأربعون النووية
-1. The Forty Hadith Qudsi الأربعون القدسية
-1. The Forty Hadith of Shah Waliullah أربعون الشاه ولي الله
+### The Nine Books (الكتب التسعة)
+- Sahih al-Bukhari (صحيح البخاري)
+- Sahih Muslim (صحيح مسلم)
+- Sunan Abi Dawud (سنن أبي داود)
+- Jami` at-Tirmidhi (جامع الترمذي)
+- Sunan an-Nasa'i (سنن النسائي)
+- Sunan Ibn Majah (سنن ابن ماجه)
+- Muwatta Malik (موطأ مالك)
+- Musnad Ahmad (مسند أحمد)
+- Sunan ad-Darimi (سنن الدارمي)
 
-## Stack:
+### Collections of Forty (كتب الأربعين)
+- The Forty Hadith of al-Imam an-Nawawi (الأربعون النووية)
+- The Forty Hadith Qudsi (الأربعون القدسية)
+- The Forty Hadith of Shah Waliullah (أربعون الشاه ولي الله)
 
--  Node.js
--  TypeScript
--  Cheerio.js
--  Axios
--  cli-progress
+### Other Books (كتب أخرى)
+- Riyad as-Salihin (رياض الصالحين)
+- Al-Adab Al-Mufrad (الأدب المفرد)
+- Bulugh al-Maram (بلوغ المرام)
+- Mishkat al-Masabih (مشكاة المصابيح)
+- Shamail Muhammadiyah (الشمائل المحمدية)
 
-## Data Source:
+## 🚀 Quick Start
 
-The data was scrapped from [Sunnah.com](https://sunnah.com/), and was converted to JSON format using a custom script. All scripts are available in the `src` folder.
+### Installation
 
-## واجهة برمجة التطبيقات (API)
+```bash
+# Clone the repository
+git clone https://github.com/elmasri-tayeb/hadith-json.git
 
-### كيفية البدء
+# Navigate to project directory
+cd hadith-json
+
+# Install dependencies
+npm install
+
+# Start the server
+npm run serve
+```
+
+### Basic Usage
+
+```bash
+# Get a specific hadith
+curl http://localhost:3000/hadith/40944
+
+# Search in hadith text
+curl http://localhost:3000/search?q=النية
+
+# Get hadiths by narrator
+curl http://localhost:3000/hadith/by-narrator/أبو%20هريرة
+```
+
+## 📖 Documentation
+
+Detailed API documentation is available in three formats:
+- [API Guide (English)](API_GUIDE.md)
+- [API Guide (Arabic)](PROMPT_GUIDE.md)
+- [Isnad Documentation](ISNAD_GUIDE.md)
+
+## 🛠️ Tech Stack
+
+- **Runtime**: Node.js
+- **Language**: TypeScript
+- **Libraries**: Express, Cheerio.js, Axios
+- **Testing**: Jest
+- **Documentation**: Markdown
+- **Version Control**: Git
+
+## 📊 Statistics
+
+- **Total Hadiths**: 50,884
+- **Languages**: Arabic & English
+- **Books**: 17
+- **API Endpoints**: 7
+- **Response Format**: JSON
+- **UTF-8 Support**: Yes
+
+## 🔄 Data Updates
+
+The database is regularly updated and verified against trusted sources. Data is scraped from [Sunnah.com](https://sunnah.com/) and thoroughly processed to ensure accuracy.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Data sourced from [Sunnah.com](https://sunnah.com/)
+- Special thanks to all contributors and Islamic scholars
+
+<div dir="rtl">
+
+## تنويه
+
+هذا المشروع هو مصدر مفتوح يهدف إلى تسهيل الوصول إلى الأحاديث النبوية الشريفة للمطورين والباحثين. نرجو استخدام هذه الأداة بما يخدم الإسلام والمسلمين.
+
+</div>
 
 1. قم بتثبيت المتطلبات:
 ```bash
