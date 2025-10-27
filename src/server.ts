@@ -13,10 +13,28 @@ const port = 3000;
 // تخزين مؤقت للرواة
 const narratorsCache = new Map<string, Set<string>>();
 
-// Enable CORS
-app.use(cors());
+// إعدادات CORS
+const corsOptions = {
+  origin: '*', // السماح لجميع المصادر
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
 
-// Parse JSON bodies
+// تمكين CORS مع الإعدادات المخصصة
+app.use(cors(corsOptions));
+
+// إضافة Headers إضافية للأمان
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  next();
+});
+
+// تحليل طلبات JSON
 app.use(express.json());
 
 // Start the server
