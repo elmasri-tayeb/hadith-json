@@ -42,12 +42,98 @@ An extensive JSON-formatted database is available, containing the Hadiths - Prop
 
 The data was scrapped from [Sunnah.com](https://sunnah.com/), and was converted to JSON format using a custom script. All scripts are available in the `src` folder.
 
-## Data Format:
+## واجهة برمجة التطبيقات (API)
 
-The data is available in two formats:
+### كيفية البدء
 
-1. By Book: The Hadiths are grouped by book. See all Books in the [`db/by_book`](./db/by_book) folder.
-1. By Chapter: The Hadiths are grouped by chapter. See all Chapters in the [`db/by_chapter`](./db/by_chapter) folder.
+1. قم بتثبيت المتطلبات:
+```bash
+npm install
+```
+
+2. قم بتشغيل الخادم:
+```bash
+npm run serve
+```
+
+الخادم سيعمل على المنفذ 3000: http://localhost:3000
+
+### نقاط النهاية API Endpoints
+
+#### 1. الصفحة الرئيسية
+- **الرابط**: `GET /`
+- **الوصف**: يعرض معلومات عامة عن الAPI ونقاط النهاية المتاحة
+- **مثال**: http://localhost:3000/
+
+#### 2. قائمة الكتب
+- **الرابط**: `GET /books`
+- **الوصف**: يعرض قائمة بجميع الكتب المتاحة
+- **مثال**: http://localhost:3000/books
+- **مثال للاستجابة**:
+```json
+[
+  {
+    "name": "Sahih al-Bukhari",
+    "arabicName": "صحيح البخاري",
+    "author": "Muhammad ibn Ismail al-Bukhari",
+    "arabicAuthor": "محمد بن إسماعيل البخاري",
+    "path": "the_9_books/bukhari"
+  }
+]
+```
+
+#### 3. الحصول على كتاب محدد
+- **الرابط**: `GET /book/:bookPath`
+- **الوصف**: يعرض محتوى كتاب كامل
+- **المعاملات**:
+  - `bookPath`: مسار الكتاب (يمكن الحصول عليه من نقطة النهاية /books)
+- **أمثلة**:
+  - صحيح البخاري: http://localhost:3000/book/the_9_books/bukhari.json
+  - الأربعون النووية: http://localhost:3000/book/forties/nawawi40.json
+
+#### 4. الحصول على باب محدد
+- **الرابط**: `GET /chapter/:bookName/:chapterNumber`
+- **الوصف**: يعرض محتوى باب محدد من كتاب
+- **المعاملات**:
+  - `bookName`: اسم الكتاب (مثل bukhari, muslim, nawawi40)
+  - `chapterNumber`: رقم الباب
+- **أمثلة**:
+  - الباب الأول من صحيح البخاري: http://localhost:3000/chapter/bukhari/1
+  - الحديث الأول من الأربعين النووية: http://localhost:3000/chapter/nawawi40/1
+
+يتم تحديد فئة الكتاب (الكتب التسعة، الأربعينات، الكتب الأخرى) تلقائياً حسب اسم الكتاب.
+
+### أمثلة للاستخدام
+
+#### الحصول على حديث محدد من الأربعين النووية
+```bash
+curl http://localhost:3000/chapter/nawawi40/1
+```
+
+#### الحصول على الباب الأول من صحيح البخاري
+```bash
+curl http://localhost:3000/chapter/bukhari/1
+```
+
+### هيكل البيانات
+البيانات متوفرة بصيغتين:
+
+1. حسب الكتاب: الأحاديث مجمعة حسب الكتاب في المجلد [`db/by_book`](./db/by_book)
+2. حسب الباب: الأحاديث مجمعة حسب الباب في المجلد [`db/by_chapter`](./db/by_chapter)
+
+#### هيكل الحديث
+```json
+{
+  "number": "1",
+  "arab": "النص العربي للحديث",
+  "text": "English translation of the hadith",
+  "reference": {
+    "book": "اسم الكتاب",
+    "chapter": "اسم الباب",
+    "number": "رقم الحديث"
+  }
+}
+```
 1. Next INSHALLAH will add more formats.
 
 See all Types in the [`types/index.d.ts`](./types/index.d.ts) file.

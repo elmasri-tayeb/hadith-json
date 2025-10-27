@@ -7,6 +7,7 @@
 		"dev": "tsup --watch",
 		"build": "tsup",
 		"start": "node dist/index.js",
+		"serve": "tsup src/server.ts && node dist/server.js",
 		"format": "biome check . --apply"
 	},
 	"keywords": [],
@@ -16,6 +17,7 @@
 		"@biomejs/biome": "^1.6.4",
 		"@types/cheerio": "^0.22.31",
 		"@types/cli-progress": "^3.11.0",
+		"@types/express": "^5.0.4",
 		"@types/node": "^18.19.29",
 		"tsup": "^8.0.2",
 		"typescript": "^5.0.4"
@@ -24,7 +26,9 @@
 		"axios": "^1.4.0",
 		"cheerio": "^1.0.0-rc.12",
 		"cli-progress": "^3.12.0",
+		"cors": "^2.8.5",
 		"dotenv": "^16.0.3",
+		"express": "^5.1.0",
 		"mongodb": "^5.4.0"
 	}
 }
