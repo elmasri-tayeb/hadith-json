@@ -468,7 +468,7 @@ app.get('/api/hadith/by-narrator', (req, res) => {
 });
 
 // الحصول على شجرة الإسناد لحديث معين
-app.get('/hadith/:id/isnad', (req, res) => {
+app.get('/api/hadith/:id/isnad', (req, res) => {
     try {
         const { id } = req.params;
         console.log('Searching for hadith ID:', id);
@@ -482,17 +482,32 @@ app.get('/hadith/:id/isnad', (req, res) => {
                 
                 const hadith = bookData.hadiths.find((h: any) => h.id === parseInt(id));
                 if (hadith) {
-                    const narrators = extractNarrators(hadith.arabic);
-                    const hadithGrade = extractGrade(hadith.arabic, hadith.english.text);
+                    // تقسيم النص إلى سند ومتن
+                    const parts = hadith.arabic.split(/[.:](?=\s)/);
+                    const isnadText = parts.length > 1 ? parts[0] : hadith.arabic;
+                    
+                    // استخراج معلومات الرواة من السند فقط
+                    const narrators = extractNarrators(isnadText);
                     res.json({
                         id: hadith.id,
-                        book: {
-                            arabic: book.arabic.title,
-                            english: book.english.title
+                        isnadText: isnadText,
+                        bookInfo: {
+                            name: {
+                                arabic: book.arabic.title,
+                                english: book.english.title
+                            },
+                            author: {
+                                arabic: book.arabic.author,
+                                english: book.english.author
+                            }
                         },
-                        grade: hadithGrade ? hadithGrade.grade : 'غير معروف',
-                        gradeSource: hadithGrade?.source,
-                        narrators
+                        narratorsChain: {
+                            count: narrators.chain.length,
+                            narrators: narrators.chain.map(narrator => ({
+                                name: narrator.name,
+                                title: narrator.title
+                            }))
+                        }
                     });
                     return;
                 }
