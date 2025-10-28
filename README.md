@@ -12,11 +12,21 @@
 - **Bilingual Support**: Full Arabic and English translations
 - **Advanced Search**: Search by text, narrator, or grade
 - **Rich Metadata**: Includes grades, narrators chain, and references
-- **Advanced Isnad Analysis**: Full narrator chain analysis with biographical information
-- **Modern API**: RESTful endpoints with JSON responses
+- **Smart Isnad Analysis**: 
+  - Automatic narrator classification (Prophet, Companion, Scholar, etc.)
+  - Full narrator chain with proper hierarchy
+  - Detection of narrator types and titles
+  - Support for multiple narration paths
+- **Modern API**: 
+  - RESTful endpoints with JSON responses
+  - Efficient search across all collections
+  - Smart caching for better performance
 - **Well Documented**: Detailed API documentation with examples
-- **Narrator Search**: Search hadiths by narrator names in Arabic or English
-- **Isnad Trees**: View complete chain of narration for any hadith
+- **Enhanced Narrator Search**: 
+  - Search by narrator name in Arabic or English
+  - Filter by narrator type or level
+  - Search across multiple collections
+- **Grade Analysis**: Automatic hadith grade detection and validation
 
 ## Hadiths Count:
 
