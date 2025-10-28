@@ -8,6 +8,7 @@ export interface Narrator {
         english: string;
     };
     level: number;
+    type?: 'prophet' | 'companion' | 'scholar' | 'position' | 'راوي';
 }
 
 export interface NarratorChain {
