@@ -595,8 +595,4 @@ app.get('/chapter/:bookName/:chapterNumber', (req, res) => {
     }
 });
 
-// بدء تشغيل الخادم
-app.listen(port, () => {
-    console.log(`الخادم يعمل على المنفذ ${port}`);
-    console.log(`يمكنك الوصول إلى الخدمة على http://localhost:${port}`);
-});
+// تم نقل كود بدء تشغيل الخادم إلى الأعلى
