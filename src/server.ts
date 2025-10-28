@@ -33,21 +33,24 @@ app.get('/', (req: Request, res: Response) => {
   res.json({
     message: "مرحباً بكم في خدمة API للأحاديث",
     availableEndpoints: {
-      "/books": "قائمة جميع الكتب",
-      "/book/:bookName": "الحصول على كتاب محدد",
-      "/chapter/:bookName/:chapterNumber": "الحصول على باب محدد من كتاب",
-      "/hadith/:id": "الحصول على حديث محدد برقمه",
-      "/search/text/:query": "البحث في متن الحديث",
-      "/hadith/by-narrator/:name": "البحث عن الأحاديث حسب الراوي",
-      "/hadith/by-grade/:grade": "البحث عن الأحاديث حسب الدرجة",
+      "api/books": "قائمة جميع الكتب",
+      "api/book/:bookName": "الحصول على كتاب محدد",
+      "api/chapter/:bookName/:chapterNumber": "الحصول على باب محدد من كتاب",
+      "api/hadith/:id": "الحصول على حديث محدد برقمه",
+      "api/search?q=:query": "البحث في متن الحديث",
+      "api/hadith/by-narrator?name=:name": "البحث عن الأحاديث حسب الراوي",
+      "api/hadith/by-grade?grade=:grade": "البحث عن الأحاديث حسب الدرجة",
       "/book/:collection/:bookName": "الحصول على كتاب محدد من مجموعة محددة"
     }
   });
 });
 
 // البحث في متن الحديث
-app.get('/search/text/:query', (req: Request, res: Response) => {
-  const query = req.params.query.toLowerCase();
+app.get('/api/search', (req: Request, res: Response) => {
+  const query = (req.query.q as string || '').toLowerCase();
+  if (!query) {
+    return res.status(400).json({ error: 'Missing search query parameter (q)' });
+  }
   const results: any[] = [];
 
   for (const book of books) {
@@ -71,8 +74,8 @@ app.get('/search/text/:query', (req: Request, res: Response) => {
 });
 
 // البحث عن الأحاديث حسب الدرجة
-app.get('/hadith/by-grade/:grade', (req: Request, res: Response) => {
-  const gradeParam = decodeURIComponent(req.params.grade);
+app.get('/api/hadith/by-grade', (req: Request, res: Response) => {
+  const gradeParam = decodeURIComponent(req.query.grade as string || '');
   const validGrades: HadithGrade[] = [
     'صحيح', 'حسن', 'ضعيف', 'صحيح لغيره', 'حسن لغيره',
     'ضعيف جداً', 'موضوع', 'مقبول', 'متفق عليه', 'غير معروف'
@@ -419,9 +422,12 @@ app.get('/book/:category/:bookName', (req, res) => {
 });
 
 // البحث عن الأحاديث حسب الراوي
-app.get('/hadith/by-narrator/:narratorName', (req, res) => {
+app.get('/api/hadith/by-narrator', (req, res) => {
     try {
-        const { narratorName } = req.params;
+        const narratorName = req.query.name as string;
+        if (!narratorName) {
+            return res.status(400).json({ error: 'Missing narrator name parameter (name)' });
+        }
         console.log('Searching for narrator:', narratorName);
         const results: HadithWithNarrators[] = [];
         console.log('Total books to search:', books.length);
