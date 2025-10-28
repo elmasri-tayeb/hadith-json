@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { books } from './books';
 import { extractNarrators } from './helpers/extractNarrators';
 import { extractGrade } from './helpers/extractGrade';
@@ -111,23 +111,33 @@ app.get('/api/hadith/by-grade', (req: Request, res: Response) => {
 // الحصول على حديث محدد برقمه
 app.get('/hadith/:id', (req: Request, res: Response) => {
   const hadithId = parseInt(req.params.id);
+  const collections = ['forties', 'other_books', 'the_9_books'];
   
-  for (const book of books) {
-    try {
-      const bookPath = Array.isArray(book.path) ? book.path.join('/') : book.path;
-      const bookContent = readFileSync(path.join(__dirname, '..', 'db', 'by_book', bookPath), 'utf-8');
-      const hadiths = JSON.parse(bookContent);
-      
-      const hadith = hadiths.find((h: any) => h.id === hadithId);
-      if (hadith) {
-        return res.json({
-          ...hadith,
-          narratorChain: extractNarrators(hadith.arabic),
-          grade: extractGrade(hadith.arabic, hadith.english)
-        });
+  for (const collection of collections) {
+    for (const book of books) {
+      try {
+        const bookPath = Array.isArray(book.path) ? book.path.join('/') : book.path;
+        const filePath = path.join(__dirname, '..', 'db', 'by_book', collection, bookPath);
+        
+        if (!existsSync(filePath)) continue;
+        
+        const bookContent = readFileSync(filePath, 'utf-8');
+        const parsedContent = JSON.parse(bookContent);
+        
+        if (!parsedContent.hadiths) continue;
+        
+        const hadith = parsedContent.hadiths.find((h: any) => h.id === hadithId);
+        if (hadith) {
+          return res.json({
+            ...hadith,
+            collection,
+            narratorChain: extractNarrators(hadith.arabic),
+            grade: extractGrade(hadith.arabic, hadith.english)
+          });
+        }
+      } catch (error) {
+        console.error(`Error finding hadith in ${collection}/${book.path}:`, error);
       }
-    } catch (error) {
-      console.error(`Error finding hadith in book ${book.path}:`, error);
     }
   }
 
