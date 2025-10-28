@@ -595,4 +595,109 @@ app.get('/chapter/:bookName/:chapterNumber', (req, res) => {
     }
 });
 
-// تم نقل كود بدء تشغيل الخادم إلى الأعلى
+// الحصول على معلومات حديث كاملة
+app.get('/api/hadith/:id/full', (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('Fetching full details for hadith:', id);
+        
+        // البحث في جميع الكتب
+        for (const book of books) {
+            const bookPath = path.join(process.cwd(), 'db', 'by_book', ...book.path) + '.json';
+            try {
+                const bookContent = readFileSync(bookPath, 'utf8');
+                const bookData = JSON.parse(bookContent);
+                
+                const hadith = bookData.hadiths.find((h: any) => h.id === parseInt(id));
+                if (hadith) {
+                    // تقسيم النص العربي لاستخراج المتن والسند
+                    const parts = hadith.arabic.split(/[.:](?=\s)/);
+                    const isnadText = parts.length > 1 ? parts[0] : '';
+                    const matnText = parts.length > 1 ? parts.slice(1).join('. ') : hadith.arabic;
+
+                    // استخراج معلومات السند والدرجة
+                    const narrators = extractNarrators(isnadText);
+                    const gradeInfo = extractGrade(hadith.arabic, hadith.english.text);
+                    
+                    // تحديد درجة الحديث بناءً على عدة معايير
+                    let hadithGrade = "غير معروف";
+                    let gradeSource = undefined;
+                    
+                    // 1. التحقق من وجود كلمة "صحيحيهما" في النص
+                    if (hadith.arabic.includes("صحيحيهما")) {
+                        hadithGrade = "متفق عليه";
+                        gradeSource = "البخاري ومسلم";
+                    }
+                    // 2. التحقق من معلومات الدرجة المستخرجة
+                    else if (gradeInfo) {
+                        hadithGrade = gradeInfo.grade;
+                        gradeSource = gradeInfo.source;
+                    }
+                    // 3. التحقق من مصدر الكتاب
+                    else if (book.path.includes("bukhari")) {
+                        hadithGrade = "صحيح";
+                        gradeSource = "البخاري";
+                    }
+                    else if (book.path.includes("muslim")) {
+                        hadithGrade = "صحيح";
+                        gradeSource = "مسلم";
+                    }
+
+                    res.json({
+                        id: hadith.id,
+                        book: {
+                            id: book.id,
+                            name: {
+                                arabic: book.arabic.title,
+                                english: book.english.title
+                            },
+                            author: {
+                                arabic: book.arabic.author,
+                                english: book.english.author
+                            },
+                            path: book.path
+                        },
+                        chapter: hadith.chapterId || 0,
+                        numberInBook: hadith.idInBook,
+                        grade: {
+                            value: hadithGrade,
+                            source: gradeSource
+                        },
+                        text: {
+                            arabic: {
+                                full: hadith.arabic,
+                                isnad: isnadText.trim(),
+                                matn: matnText.trim()
+                            },
+                            english: {
+                                narrator: hadith.english.narrator || "",
+                                text: hadith.english.text || ""
+                            }
+                        },
+                        narrators: {
+                            chain: narrators.chain.map(n => ({
+                                name: n.name,
+                                title: n.title,
+                                level: n.level
+                            })),
+                            tree: narrators,
+                            count: narrators.chain.length
+                        },
+                        references: {
+                            primary: `${book.arabic.title} - حديث رقم ${hadith.idInBook}`,
+                            secondary: []
+                        }
+                    });
+                    return;
+                }
+            } catch (error) {
+                console.error(`Error processing book ${book.path.join('/')}: ${error}`);
+            }
+        }
+        
+        res.status(404).json({ error: 'الحديث غير موجود' });
+    } catch (error) {
+        console.error('Error processing request:', error);
+        res.status(500).json({ error: 'خطأ في معالجة الطلب' });
+    }
+});
