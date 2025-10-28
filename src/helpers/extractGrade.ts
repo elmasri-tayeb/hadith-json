@@ -1,9 +1,11 @@
-export interface HadithGrade {
-    grade: string;
+import { HadithGrade } from '../types/hadith';
+
+export interface GradeInfo {
+    grade: HadithGrade;
     source?: string;
 }
 
-export function extractGrade(arabic: string, english: string): HadithGrade | undefined {
+export function extractGrade(arabic: string, english: string): GradeInfo | undefined {
     // Common grade patterns in Arabic text
     const gradePatterns = {
         'صحيح': [/حديث صحيح/, /صحيح$/i, /وقال.*صحيح/, /رواه.*صحيح/],

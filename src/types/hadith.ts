@@ -20,4 +20,8 @@ export interface Hadith {
         number: number;
     };
     grade?: HadithGrade;
+    narratorChain?: NarratorChain;
+}
+    };
+    grade?: HadithGrade;
 }

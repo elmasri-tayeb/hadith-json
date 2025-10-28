@@ -6,12 +6,14 @@ import { books } from './books';
 import { extractNarrators } from './helpers/extractNarrators';
 import { extractGrade } from './helpers/extractGrade';
 import { HadithWithNarrators } from './types/narrators';
+import { HadithGrade } from './types/hadith';
 
 const app = express();
 const port = 3000;
 
-// تخزين مؤقت للرواة
+// تخزين مؤقت للرواة والأحاديث
 const narratorsCache = new Map<string, Set<string>>();
+const hadithCache = new Map<string, HadithWithNarrators>();
 
 // إعدادات CORS
 const corsOptions = {
@@ -25,6 +27,172 @@ const corsOptions = {
 
 // تمكين CORS مع الإعدادات المخصصة
 app.use(cors(corsOptions));
+
+// الصفحة الرئيسية مع قائمة نقاط النهاية المتاحة
+app.get('/', (req: Request, res: Response) => {
+  res.json({
+    message: "مرحباً بكم في خدمة API للأحاديث",
+    availableEndpoints: {
+      "/books": "قائمة جميع الكتب",
+      "/book/:bookName": "الحصول على كتاب محدد",
+      "/chapter/:bookName/:chapterNumber": "الحصول على باب محدد من كتاب",
+      "/hadith/:id": "الحصول على حديث محدد برقمه",
+      "/search/text/:query": "البحث في متن الحديث",
+      "/hadith/by-narrator/:name": "البحث عن الأحاديث حسب الراوي",
+      "/hadith/by-grade/:grade": "البحث عن الأحاديث حسب الدرجة",
+      "/book/:collection/:bookName": "الحصول على كتاب محدد من مجموعة محددة"
+    }
+  });
+});
+
+// البحث في متن الحديث
+app.get('/search/text/:query', (req: Request, res: Response) => {
+  const query = req.params.query.toLowerCase();
+  const results: any[] = [];
+
+  for (const book of books) {
+    try {
+      const bookPath = Array.isArray(book.path) ? book.path.join('/') : book.path;
+      const bookContent = readFileSync(path.join(__dirname, '..', 'db', 'by_book', bookPath), 'utf-8');
+      const hadiths = JSON.parse(bookContent);
+      
+      const matchingHadiths = hadiths.filter((hadith: any) => 
+        hadith.arabic.toLowerCase().includes(query) || 
+        hadith.english.toLowerCase().includes(query)
+      );
+      
+      results.push(...matchingHadiths);
+    } catch (error) {
+      console.error(`Error searching in book ${book.path}:`, error);
+    }
+  }
+
+  res.json(results);
+});
+
+// البحث عن الأحاديث حسب الدرجة
+app.get('/hadith/by-grade/:grade', (req: Request, res: Response) => {
+  const gradeParam = decodeURIComponent(req.params.grade);
+  const validGrades: HadithGrade[] = [
+    'صحيح', 'حسن', 'ضعيف', 'صحيح لغيره', 'حسن لغيره',
+    'ضعيف جداً', 'موضوع', 'مقبول', 'متفق عليه', 'غير معروف'
+  ];
+
+  if (!validGrades.includes(gradeParam as HadithGrade)) {
+    return res.status(400).json({ error: 'Invalid grade parameter' });
+  }
+
+  const grade = gradeParam as HadithGrade;
+  const results: any[] = [];
+
+  for (const book of books) {
+    try {
+      const bookPath = Array.isArray(book.path) ? book.path.join('/') : book.path;
+      const bookContent = readFileSync(path.join(__dirname, '..', 'db', 'by_book', bookPath), 'utf-8');
+      const hadiths = JSON.parse(bookContent);
+      
+      const matchingHadiths = hadiths.filter((hadith: any) => {
+        const gradeInfo = extractGrade(hadith.arabic, hadith.english);
+        return gradeInfo?.grade === grade;
+      });
+      
+      results.push(...matchingHadiths);
+    } catch (error) {
+      console.error(`Error searching by grade in book ${book.path}:`, error);
+    }
+  }
+
+  res.json(results);
+});
+
+// الحصول على حديث محدد برقمه
+app.get('/hadith/:id', (req: Request, res: Response) => {
+  const hadithId = parseInt(req.params.id);
+  
+  for (const book of books) {
+    try {
+      const bookPath = Array.isArray(book.path) ? book.path.join('/') : book.path;
+      const bookContent = readFileSync(path.join(__dirname, '..', 'db', 'by_book', bookPath), 'utf-8');
+      const hadiths = JSON.parse(bookContent);
+      
+      const hadith = hadiths.find((h: any) => h.id === hadithId);
+      if (hadith) {
+        return res.json({
+          ...hadith,
+          narratorChain: extractNarrators(hadith.arabic),
+          grade: extractGrade(hadith.arabic, hadith.english)
+        });
+      }
+    } catch (error) {
+      console.error(`Error finding hadith in book ${book.path}:`, error);
+    }
+  }
+
+  res.status(404).json({ error: 'Hadith not found' });
+});
+
+// البحث عن الأحاديث حسب الراوي
+app.get('/search/narrator/:name', (req: Request, res: Response) => {
+  const narratorName = req.params.name;
+  const results: HadithWithNarrators[] = [];
+
+  // البحث في جميع الكتب
+  for (const book of books) {
+    try {
+      const bookPath = Array.isArray(book.path) ? book.path.join('/') : book.path;
+      const bookContent = readFileSync(path.join(__dirname, '..', 'db', 'by_book', bookPath), 'utf-8');
+      const hadiths = JSON.parse(bookContent);
+      
+      for (const hadith of hadiths) {
+        const narratorChain = extractNarrators(hadith.arabic);
+        if (narratorChain && narratorChain.chain.some(n => 
+          n.name.arabic.includes(narratorName) || 
+          n.name.english.toLowerCase().includes(narratorName.toLowerCase())
+        )) {
+          results.push({
+            ...hadith,
+            narratorChain,
+            grade: extractGrade(hadith.arabic, hadith.english)
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`Error processing book ${book.path}:`, error);
+    }
+  }
+
+  res.json(results);
+});
+
+// الحصول على شجرة الإسناد لحديث معين
+app.get('/hadith/:bookId/:hadithId/isnad', (req: Request, res: Response) => {
+  const { bookId, hadithId } = req.params;
+  const book = books.find(b => b.id === parseInt(bookId));
+  
+  if (!book) {
+    return res.status(404).json({ error: 'Book not found' });
+  }
+
+  try {
+    const bookPath = Array.isArray(book.path) ? book.path.join('/') : book.path;
+    const bookContent = readFileSync(path.join(__dirname, '..', 'db', 'by_book', bookPath), 'utf-8');
+    const hadiths = JSON.parse(bookContent);
+    const hadith = hadiths.find((h: any) => h.id === parseInt(hadithId));
+
+    if (!hadith) {
+      return res.status(404).json({ error: 'Hadith not found' });
+    }
+
+    const narratorChain = extractNarrators(hadith.arabic);
+    res.json({
+      hadithId: hadith.id,
+      narratorChain,
+      grade: extractGrade(hadith.arabic, hadith.english)
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // إضافة Headers إضافية للأمان
 app.use((req, res, next) => {

@@ -18,6 +18,76 @@ npm run serve
 
 سيعمل الخادم على العنوان: http://localhost:3000
 
+## نقاط النهاية الجديدة للرواة والإسناد
+
+### البحث عن الأحاديث حسب الراوي
+```http
+GET /search/narrator/:name
+```
+
+يمكنك البحث عن جميع الأحاديث التي يرويها راوٍ معين باستخدام اسمه بالعربية أو الإنجليزية.
+
+مثال:
+```http
+GET /search/narrator/أبو هريرة
+```
+
+الاستجابة ستتضمن:
+```json
+[
+  {
+    "id": 123,
+    "arabic": "...",
+    "english": "...",
+    "narratorChain": {
+      "chain": [
+        {
+          "name": {
+            "arabic": "أبو هريرة",
+            "english": "Abu Huraira"
+          },
+          "level": 1
+        }
+      ],
+      "type": "مرفوع"
+    },
+    "grade": "صحيح"
+  }
+]
+```
+
+### الحصول على شجرة الإسناد لحديث معين
+```http
+GET /hadith/:bookId/:hadithId/isnad
+```
+
+يمكنك الحصول على سلسلة الرواة الكاملة لحديث معين.
+
+مثال:
+```http
+GET /hadith/1/7207/isnad
+```
+
+الاستجابة ستتضمن:
+```json
+{
+  "hadithId": 7207,
+  "narratorChain": {
+    "chain": [
+      {
+        "name": {
+          "arabic": "أبو هريرة",
+          "english": "Abu Huraira"
+        },
+        "level": 1
+      }
+    ],
+    "type": "مرفوع"
+  },
+  "grade": "صحيح"
+}
+```
+
 ## قائمة الكتب المتوفرة وروابطها
 
 ### الكتب التسعة (the_9_books)
